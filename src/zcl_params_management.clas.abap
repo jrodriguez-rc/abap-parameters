@@ -484,7 +484,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD is_edit_allowed.
 
-    IF mv_crud_mode <> zif_param_constants=>crud-update AND mv_crud_mode <> zif_param_constants=>crud-create.
+    IF mv_crud_mode <> zif_params_constants=>crud-update AND mv_crud_mode <> zif_params_constants=>crud-create.
       RETURN.
     ENDIF.
 
@@ -524,7 +524,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD lock_class.
 
-    mv_crud_mode = zif_param_constants=>crud-read.
+    mv_crud_mode = zif_params_constants=>crud-read.
 
     IF mo_alv IS BOUND.
       mo_alv->set_ready_for_input( 0 ).
@@ -545,7 +545,7 @@ CLASS zcl_params_management IMPLEMENTATION.
       zcx_params=>raise_by_syst( ).
     ENDIF.
 
-    mv_crud_mode = zif_param_constants=>crud-update.
+    mv_crud_mode = zif_params_constants=>crud-update.
 
     IF mo_alv IS BOUND.
       mo_alv->set_ready_for_input( 1 ).
@@ -974,7 +974,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD check_changes.
 
-    IF mv_crud_mode <> zif_param_constants=>crud-update AND mv_crud_mode <> zif_param_constants=>crud-create.
+    IF mv_crud_mode <> zif_params_constants=>crud-update AND mv_crud_mode <> zif_params_constants=>crud-create.
       RETURN.
     ENDIF.
 
@@ -1351,9 +1351,9 @@ CLASS zcl_params_management IMPLEMENTATION.
           AND cmpname = @ls_attribute-cmpname.
       IF sy-subrc = 0.
         INSERT ls_data_old INTO TABLE lt_data_old.
-        ls_data_mod-crud_mode = zif_param_constants=>crud-update.
+        ls_data_mod-crud_mode = zif_params_constants=>crud-update.
       ELSE.
-        ls_data_mod-crud_mode = zif_param_constants=>crud-create.
+        ls_data_mod-crud_mode = zif_params_constants=>crud-create.
       ENDIF.
 
       INSERT ls_data_mod INTO TABLE lt_data_mod.

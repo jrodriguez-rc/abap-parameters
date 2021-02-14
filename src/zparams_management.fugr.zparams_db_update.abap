@@ -1,4 +1,4 @@
-FUNCTION zparams_db_update.
+FUNCTION ZPARAMS_DB_UPDATE.
 *"----------------------------------------------------------------------
 *"*"Update Function Module:
 *"
@@ -31,7 +31,7 @@ FUNCTION zparams_db_update.
     ls_writedoc = CORRESPONDING #( ls_data ).
 
     CASE ls_data-crud_mode.
-      WHEN zif_param_constants=>crud-create.
+      WHEN zif_params_constants=>crud-create.
         ls_writedoc-kz = 'I'.
         INSERT zparams FROM ls_parameter_db.
         IF sy-subrc <> 0.
@@ -41,7 +41,7 @@ FUNCTION zparams_db_update.
                   WITH ls_parameter_db-clsname ls_parameter_db-cmpname.
         ENDIF.
 
-      WHEN zif_param_constants=>crud-update.
+      WHEN zif_params_constants=>crud-update.
         ls_writedoc-kz = 'U'.
         UPDATE zparams FROM ls_parameter_db.
         IF sy-subrc <> 0.
@@ -51,7 +51,7 @@ FUNCTION zparams_db_update.
                   WITH ls_parameter_db-clsname ls_parameter_db-cmpname.
         ENDIF.
 
-      WHEN zif_param_constants=>crud-delete.
+      WHEN zif_params_constants=>crud-delete.
         ls_writedoc-kz = 'D'.
         DELETE FROM zparams WHERE clsname = ls_data-clsname
                                     AND cmpname = ls_data-cmpname.
