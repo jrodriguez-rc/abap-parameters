@@ -341,6 +341,7 @@ CLASS zcl_params_management IMPLEMENTATION.
       lt_classes    TYPE seo_relkeys,
       ls_class_key  LIKE LINE OF lt_classes,
       ls_class      LIKE LINE OF rt_classes,
+      lo_example    TYPE REF TO zcl_params_example,
       lv_obj_name   TYPE sobj_name.
 
     IF iv_refresh = abap_true.
@@ -367,6 +368,13 @@ CLASS zcl_params_management IMPLEMENTATION.
       CLEAR: ls_class.
 
       CREATE OBJECT ls_class-param_obj TYPE (ls_class_key-clsname).
+
+      TRY.
+          lo_example ?= ls_class-param_obj.
+          CHECK lo_example->example_class_active = abap_true.
+        CATCH cx_sy_move_cast_error.
+          CLEAR: lo_example.
+      ENDTRY.
 
       IF ms_activity-subobject IS NOT INITIAL AND ls_class-param_obj->get_img_subobject( ) <> ms_activity-subobject.
         CONTINUE.
