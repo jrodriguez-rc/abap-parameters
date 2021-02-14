@@ -130,7 +130,7 @@
             "doma": "^ZPARAMS",
             "msag": "^ZPARAMS",
             "tran": "^Z(PARAMS|22)",
-            "enqu": "^ZEPARAMS",
+            "enqu": "^EZPARAMS",
             "auth": "^Z",
             "pinf": "^ZPARAMS",
             "idoc": "^ZPARAMS",
