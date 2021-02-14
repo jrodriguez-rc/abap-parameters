@@ -338,10 +338,10 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     DATA:
       lo_main_class TYPE REF TO cl_oo_class,
-      lt_classes  TYPE seo_relkeys,
-      ls_class_key LIKE LINE OF lt_classes,
-      ls_class    LIKE LINE OF rt_classes,
-      lv_obj_name TYPE sobj_name.
+      lt_classes    TYPE seo_relkeys,
+      ls_class_key  LIKE LINE OF lt_classes,
+      ls_class      LIKE LINE OF rt_classes,
+      lv_obj_name   TYPE sobj_name.
 
     IF iv_refresh = abap_true.
       CLEAR: mt_classes.
@@ -1047,7 +1047,11 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     mo_alv->check_changed_data( ).  " Refresh data from ALV
 
-    LOOP AT mt_attributes INTO ls_attribute WHERE value <> old_value.
+    LOOP AT mt_attributes INTO ls_attribute.
+      IF ls_attribute-value = ls_attribute-old_value.
+        CONTINUE.
+      ENDIF.
+
       INSERT ls_attribute INTO TABLE rt_changed.
     ENDLOOP.
 
@@ -1290,7 +1294,7 @@ CLASS zcl_params_management IMPLEMENTATION.
     CREATE OBJECT mo_msg_container.
     CREATE OBJECT mo_event_handler
       EXPORTING
-      params_management = me.
+        params_management = me.
 
     " Build the transport object.
     CALL FUNCTION 'READ_IMG_ACTIVITY_FROM_MEMORY'

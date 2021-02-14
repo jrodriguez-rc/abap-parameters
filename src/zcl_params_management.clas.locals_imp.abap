@@ -298,8 +298,8 @@ CLASS lcl_event_handler IMPLEMENTATION.
 
     TRY.
         params_management->call_function( e_ucomm ).
-      CATCH zcx_params INTO lx_exception.
-        params_management->mo_msg_container->add_exception( lx_exception ).
+      CATCH zcx_params INTO lx_param.
+        params_management->mo_msg_container->add_exception( lx_param ).
     ENDTRY.
 
     params_management->after_event( ).
