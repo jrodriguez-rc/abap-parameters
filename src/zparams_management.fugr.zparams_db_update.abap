@@ -28,7 +28,7 @@ FUNCTION zparams_db_update.
     ls_writedoc       TYPE zparams_wd_zparams,
     lv_object_id      TYPE cdobjectv.
   FIELD-SYMBOLS:
-    <ls_writedoc> LIKE LINE OF lt_writedoc
+    <ls_writedoc> LIKE LINE OF lt_writedoc.
 
   LOOP AT it_data INTO ls_data.
     CLEAR: ls_parameter_db, ls_writedoc.
