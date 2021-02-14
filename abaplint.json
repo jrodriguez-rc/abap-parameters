@@ -1,0 +1,207 @@
+{
+    "global": {
+        "files": "/src/**/*.*",
+        "skipGeneratedGatewayClasses": true,
+        "skipGeneratedPersistentClasses": true,
+        "skipGeneratedFunctionGroups": true
+    },
+    "syntax": {
+        "version": "v740sp08",
+        "errorNamespace": "^Z",
+        "globalConstants": [],
+        "globalMacros": []
+    },
+    "dependencies": [
+        {
+            "url": "https://github.com/abaplint/deps",
+            "folder": "/deps",
+            "files": "/src/**/*.*"
+        }
+    ],
+    "rules": {
+        "avoid_use": {
+            "define": true,
+            "endselect": true,
+            "execSQL": true,
+            "kernelCall": true,
+            "communication": true,
+            "statics": true,
+            "systemCall": true,
+            "defaultKey": false,
+            "break": true,
+            "describeLines": false
+        },
+        "constructor_visibility_public": true,
+        "description_empty": false,
+        "empty_statement": true,
+        "empty_structure": {
+            "try": true,
+            "loop": true,
+            "if": true,
+            "while": true,
+            "case": true,
+            "select": true,
+            "do": true,
+            "at": true
+        },
+        "exporting": true,
+        "functional_writing": {
+            "ignoreExceptions": true
+        },
+        "global_class": true,
+        "identical_form_names": true,
+        "inline_data_old_versions": true,
+        "line_length": {
+            "length": 120
+        },
+        "message_exists": true,
+        "method_length": {
+            "statements": 100,
+            "ignoreTestClasses": false,
+            "errorWhenEmpty": true,
+            "exclude":[
+                ".*WRITE*.DOC*"
+            ]
+        },
+        "mix_returning": true,
+        "msag_consistency": true,
+        "nesting": {
+            "depth": 5
+        },
+        "obsolete_statement": {
+            "refresh": true,
+            "compute": true,
+            "add": true,
+            "subtract": true,
+            "multiply": true,
+            "move": true,
+            "divide": true,
+            "requested": true,
+            "occurs": true,
+            "setExtended": true,
+            "withHeaderLine": true,
+            "fieldSymbolStructure": true,
+            "typePools": true,
+            "load": true
+        },
+        "parser_error": true,
+        "short_case": {
+            "length": 1,
+            "allow": []
+        },
+        "superclass_final": false,
+        "unreachable_code": true,
+        "use_new": true,
+        "when_others_last": true,
+        "ambiguous_statement": true,
+        "begin_end_names": true,
+        "check_transformation_exists": true,
+        "check_syntax": false,
+        "form_tables_obsolete": true,
+        "tabl_enhancement_category": true,
+        "implement_methods": false,
+        "local_testclass_location": true,
+        "main_file_contents": true,
+        "rfc_error_handling": true,
+        "sequential_blank": {
+            "lines": 4
+        },
+        "empty_line_in_statement": {
+            "allowChained": true
+        },
+        "check_abstract": true,
+        "no_public_attributes": {
+            "allowReadOnly": true
+        },
+        "abapdoc": false,
+        "local_class_naming": {
+            "exception": "^LCL_.*$",
+            "local": "^LCL_.*$",
+            "test": "^LTCL_.*$"
+        },
+        "object_naming": {
+            "clas": "^ZC(L|X)(|\\_IM|\\_DEF|\\_FB)\\_PARAMS\\_",
+            "intf": "^ZIF\\_PARAMS\\_",
+            "prog": "^Z(|F)PARAMS",
+            "fugr": "^ZPARAMS",
+            "tabl": "^Z(|S|SK|SV)(|\\_)PARAMS",
+            "ttyp": "^Z(|T|TK|TV)(|\\_)PARAMS",
+            "dtel": "^ZPARAMS",
+            "doma": "^ZPARAMS",
+            "msag": "^ZPARAMS",
+            "tran": "^Z(PARAMS|22)",
+            "enqu": "^ZEPARAMS",
+            "auth": "^Z",
+            "pinf": "^ZPARAMS",
+            "idoc": "^ZPARAMS",
+            "xslt": "^ZPARAMS",
+            "ssfo": "^ZPARAMS",
+            "ssst": "^ZPARAMS",
+            "shlp": "^ZPARAMS"
+        },
+        "space_before_colon": {
+            "exclude":[
+                ".*WRITE*.DOC*"
+            ]
+        },
+        "start_at_tab": {},
+        "prefix_is_current_class": false,
+        "keyword_case": {
+            "style": "upper",
+            "ignoreExceptions": false,
+            "ignoreLowerClassImplmentationStatement": false,
+            "ignoreGlobalClassDefinition": false,
+            "ignoreGlobalInterface": false,
+            "ignoreFunctionModuleName": false,
+            "ignoreGlobalClassBoundaries": false,
+            "ignoreKeywords": [],
+            "exclude":[
+                ".*WRITE*.DOC*",
+                "^ZF.*CD.*$"
+            ]
+        },
+        "if_in_if": {
+            "exclude":[
+                ".*WRITE*.DOC*"
+            ]
+        },
+        "max_one_statement": {
+            "exclude":[
+                ".*WRITE*.DOC*"
+            ]
+        },
+        "preferred_compare_operator": {
+            "badOperators": [
+                "><",
+                "EQ",
+                "NE",
+                "GE",
+                "GT",
+                "LT",
+                "LE"
+            ],
+            "exclude":[
+                ".*WRITE*.DOC*",
+                "^ZF.*CD.*$"
+            ]
+        },
+        "space_before_dot": {
+            "ignoreGlobalDefinition": true,
+            "ignoreExceptions": true,
+            "exclude":[
+                ".*WRITE*.DOC*"
+            ]
+        },
+        "indentation": {
+            "alignTryCatch": false,
+            "ignoreExceptions": false,
+            "globalClassSkipFirst": false,
+            "ignoreGlobalClassDefinition": false,
+            "ignoreGlobalInterface": true,
+            "exclude":[
+                ".*WRITE*.DOC*"
+            ]
+        },
+        "commented_code": true
+    }
+}
