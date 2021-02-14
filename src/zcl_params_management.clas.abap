@@ -1166,7 +1166,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
 
   METHOD cmd_default_all.
-    
+
     FIELD-SYMBOLS:
       <ls_attribute> LIKE LINE OF mt_attributes.
 
@@ -1235,7 +1235,7 @@ CLASS zcl_params_management IMPLEMENTATION.
         INTO ls_tr_key-tabkey RESPECTING BLANKS.
 
       INSERT ls_tr_key INTO TABLE lt_tr_key.
-      
+
     ENDLOOP.
 
     " Transport
