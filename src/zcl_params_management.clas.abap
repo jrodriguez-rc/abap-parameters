@@ -336,8 +336,12 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD get_classes.
 
-    DATA: ls_class    LIKE LINE OF rt_classes,
-          lv_obj_name TYPE sobj_name.
+    DATA:
+      lo_main_class TYPE REF TO cl_oo_class,
+      lt_classes  TYPE seo_relkeys,
+      ls_class_key LIKE LINE OF lt_classes,
+      ls_class    LIKE LINE OF rt_classes,
+      lv_obj_name TYPE sobj_name.
 
     IF iv_refresh = abap_true.
       CLEAR: mt_classes.
@@ -348,18 +352,18 @@ CLASS zcl_params_management IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(lo_main_class) = get_main_class( ).
+    lo_main_class = get_main_class( ).
     IF lo_main_class IS NOT BOUND.
       RETURN.
     ENDIF.
 
-    DATA(lt_classes) = lo_main_class->get_subclasses( ).
+    lt_classes = lo_main_class->get_subclasses( ).
 
     IF mv_filter_class IS NOT INITIAL.
       DELETE lt_classes WHERE clsname <> mv_filter_class.
     ENDIF.
 
-    LOOP AT lt_classes INTO DATA(ls_class_key).
+    LOOP AT lt_classes INTO ls_class_key.
       CLEAR: ls_class.
 
       CREATE OBJECT ls_class-param_obj TYPE (ls_class_key-clsname).
@@ -369,18 +373,18 @@ CLASS zcl_params_management IMPLEMENTATION.
       ENDIF.
 
       IF mv_filter_package IS INITIAL.
-        SELECT SINGLE devclass INTO @ls_class-devclass
+        SELECT SINGLE devclass INTO ls_class-devclass
           FROM  tadir
           WHERE pgmid    = 'R3TR'
             AND object   = 'CLAS'
-            AND obj_name = @ls_class_key-clsname.
+            AND obj_name = ls_class_key-clsname.
       ELSE.
-        SELECT SINGLE devclass INTO @ls_class-devclass
+        SELECT SINGLE devclass INTO ls_class-devclass
           FROM  tadir
-          WHERE devclass = @mv_filter_package
+          WHERE devclass = mv_filter_package
             AND pgmid    = 'R3TR'
             AND object   = 'CLAS'
-            AND obj_name = @ls_class_key-clsname.
+            AND obj_name = ls_class_key-clsname.
       ENDIF.
       IF sy-subrc <> 0.
         CONTINUE.
@@ -424,39 +428,53 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD get_class.
 
-    DATA(lt_classes) = get_classes( iv_refresh ).
+    DATA:
+    lt_classes TYPE zparams_t_class.
 
-    TRY.
-        rs_class = lt_classes[ clsname = iv_class ].
-      CATCH cx_sy_itab_line_not_found.
-        CLEAR: rs_class.
-    ENDTRY.
+    lt_classes = get_classes( iv_refresh ).
+
+    READ TABLE lt_classes INTO rs_class
+      WITH KEY clsname = iv_class.
+    IF sy-subrc <> 0.
+      CLEAR: rs_class.
+    ENDIF.
 
   ENDMETHOD.
 
 
   METHOD get_class_description.
 
-    DATA(ls_class) = get_class( iv_class ).
+    DATA:
+    ls_class TYPE zparams_s_class.
 
-    rv_description = COND #( WHEN ls_class IS INITIAL         THEN '<DESCR_NOT_FOUND>'
-                             WHEN ls_class-param_obj IS BOUND THEN CONV #(
-                                            LET descr = ls_class-param_obj->get_description( )
-                                                IN COND #( WHEN descr IS INITIAL THEN  ls_class-clsname
-                                                                                 ELSE descr ) )
-                                                              ELSE ls_class-clsname ) ##NO_TEXT.
+    ls_class = get_class( iv_class ).
+
+    IF ls_class-param_obj IS NOT BOUND.
+      rv_description = '<DESCR_NOT_FOUND>'.
+      RETURN.
+    ENDIF.
+
+    rv_description = ls_class-param_obj->get_description( ).
+
+    IF rv_description IS INITIAL.
+      rv_description = ls_class-clsname.
+    ENDIF.
 
   ENDMETHOD.
 
 
   METHOD get_class_params.
 
+    DATA:
+      lo_class TYPE REF TO cl_oo_object,
+      lt_attr  TYPE seo_attributes.
+
     IF iv_class IS INITIAL.
       RETURN.
     ENDIF.
 
     TRY.
-        DATA(lo_class) = cl_oo_class=>get_instance( iv_class ).
+        lo_class = cl_oo_class=>get_instance( iv_class ).
       CATCH cx_class_not_existent. " Class Does Not Exist
         CLEAR: lo_class.
     ENDTRY.
@@ -465,7 +483,7 @@ CLASS zcl_params_management IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(lt_attr) = lo_class->get_attributes( public_attributes_only = seox_true ).
+    lt_attr = lo_class->get_attributes( public_attributes_only = seox_true ).
 
     DELETE lt_attr WHERE typtype <> seoo_typtype_type.
     DELETE lt_attr WHERE attdecltyp <> seoo_attdecltyp_statics.
@@ -556,6 +574,9 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD open_class.
 
+    DATA:
+      lx_exception TYPE REF TO zcx_params.
+
     TRY.
         IF try_save_changes( ) IS INITIAL.
           RETURN.
@@ -563,7 +584,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
         unlock_class( mv_filter_class ).
 
-      CATCH zcx_params INTO DATA(lx_exception).
+      CATCH zcx_params INTO lx_exception.
         mo_msg_container->add_exception( lx_exception ).
     ENDTRY.
 
@@ -585,9 +606,12 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD pai.
 
+    DATA:
+      lx_exception TYPE REF TO zcx_params.
+
     TRY.
         rv_exit = call_function( iv_ucomm ).
-      CATCH zcx_params INTO DATA(lx_exception).
+      CATCH zcx_params INTO lx_exception.
         mo_msg_container->add_exception( lx_exception ).
     ENDTRY.
 
@@ -600,10 +624,12 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD pbo.
 
+    DATA:
+      lx_exception TYPE REF TO zcx_params.
 
     TRY.
         alv_prepare( ).
-      CATCH zcx_params INTO DATA(lx_exception).
+      CATCH zcx_params INTO lx_exception.
         mo_msg_container->add_exception( lx_exception ).
     ENDTRY.
 
@@ -612,12 +638,16 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD set_filter.
 
+    DATA:
+      lt_classes TYPE zparams_t_class,
+      ls_class   LIKE LINE OF lt_classes.
+
     mv_filter_class   = iv_filter_class.
     mv_filter_package = iv_filter_package.
 
-    DATA(lt_classes) = get_classes( ).
+    lt_classes = get_classes( ).
     IF lines( lt_classes ) = 1.
-      READ TABLE lt_classes INTO DATA(ls_class) INDEX 1.
+      READ TABLE lt_classes INTO ls_class INDEX 1.
       IF sy-subrc <> 0.
         CLEAR: ls_class.
       ENDIF.
@@ -643,6 +673,9 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD alv_get_fieldcatalog.
 
+    FIELD-SYMBOLS:
+      <ls_fcat> LIKE LINE OF rt_fieldcatalog.
+
     CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
       EXPORTING
         i_structure_name       = 'ZPARAMS_S_ATTRIBUTE'
@@ -656,7 +689,7 @@ CLASS zcl_params_management IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    LOOP AT rt_fieldcatalog ASSIGNING FIELD-SYMBOL(<ls_fcat>).
+    LOOP AT rt_fieldcatalog ASSIGNING <ls_fcat>.
 
       CASE <ls_fcat>-fieldname.
         WHEN 'CLSNAME'   " Class Name
@@ -754,6 +787,9 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD alv_prepare.
 
+    DATA:
+      lt_fcat TYPE lvc_t_fcat.
+
     alv_tree_build( ).
 
     IF mo_alv IS BOUND.
@@ -761,16 +797,20 @@ CLASS zcl_params_management IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    mo_container = NEW cl_gui_custom_container( mv_container_name ).
+    CREATE OBJECT mo_container
+      EXPORTING
+        container_name = mv_container_name.
 
-    mo_alv = NEW cl_gui_alv_grid( mo_container ).
+    CREATE OBJECT mo_alv
+      EXPORTING
+        i_parent = mo_container.
 
     mo_alv->register_edit_event( i_event_id = cl_gui_alv_grid=>mc_evt_enter ).
     mo_alv->register_edit_event( i_event_id = cl_gui_alv_grid=>mc_evt_modified ).
 
     alv_set_handler( ).
 
-    DATA(lt_fcat) = alv_get_fieldcatalog( ).
+    lt_fcat = alv_get_fieldcatalog( ).
 
     mo_alv->set_table_for_first_display(
       EXPORTING
@@ -805,9 +845,11 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD alv_tree_add_node.
 
-    DATA: lv_node_text   TYPE lvc_value,
-          lt_item_layout TYPE lvc_t_layi,
-          ls_node_layout TYPE lvc_s_layn.
+    DATA:
+      lv_node_text   TYPE lvc_value,
+      lt_item_layout TYPE lvc_t_layi,
+      ls_item_layout LIKE LINE OF lt_item_layout,
+      ls_node_layout TYPE lvc_s_layn.
 
     IF iv_is_folder = abap_true.
       ls_node_layout-isfolder = iv_is_folder.
@@ -815,8 +857,9 @@ CLASS zcl_params_management IMPLEMENTATION.
       ls_node_layout-n_image  = icon_oo_class.
     ENDIF.
 
-    INSERT VALUE #( fieldname = cl_gui_alv_tree=>c_hierarchy_column_name
-                    style     = cl_gui_column_tree=>style_default ) INTO TABLE lt_item_layout.
+    ls_item_layout-fieldname = cl_gui_alv_tree=>c_hierarchy_column_name.
+    ls_item_layout-style     = cl_gui_column_tree=>style_default.
+    INSERT ls_item_layout INTO TABLE lt_item_layout.
 
     " add node
     lv_node_text = iv_node_text.
@@ -842,9 +885,14 @@ CLASS zcl_params_management IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    mo_container_tree = NEW cl_gui_docking_container( extension = 300 ) ##NUMBER_OK.
+    CREATE OBJECT mo_container_tree
+      EXPORTING
+        extension = 300.
 
-    mo_alv_tree = NEW cl_gui_alv_tree( parent = mo_container_tree no_html_header = abap_true ).
+    CREATE OBJECT mo_alv_tree
+      EXPORTING
+        parent         = mo_container_tree
+        no_html_header = abap_true.
 
     alv_tree_set_handler( ).
 
@@ -864,33 +912,40 @@ CLASS zcl_params_management IMPLEMENTATION.
   METHOD alv_tree_build_hierarchy.
 
     DATA:
+      lt_classes      TYPE zparams_t_class,
+      ls_class        LIKE LINE OF lt_classes,
       ls_class_last   TYPE zparams_s_class,
+      ls_outtab_line  TYPE zparams_s_class,
       lv_nkey_ns      TYPE lvc_nkey,
       lv_nkey_package TYPE lvc_nkey.
 
-    DATA(lt_classes) = get_classes( ).
+    lt_classes = get_classes( ).
 
     SORT lt_classes ASCENDING BY namespace clsname.
 
-    LOOP AT lt_classes INTO DATA(ls_class).
+    LOOP AT lt_classes INTO ls_class.
 
       IF ls_class_last-namespace <> ls_class-namespace.
-        lv_nkey_ns = alv_tree_add_node( ig_outtab_line = VALUE zparams_s_class( namespace = ls_class-namespace )
+        CLEAR: ls_outtab_line.
+        ls_outtab_line-namespace = ls_class-namespace.
+        lv_nkey_ns = alv_tree_add_node( ig_outtab_line = ls_outtab_line
                                         iv_node_text   = ls_class-namespace
                                         iv_is_folder   = abap_true ).
       ENDIF.
 
       IF ls_class_last-devclass <> ls_class-devclass.
-        lv_nkey_package = alv_tree_add_node( ig_outtab_line = VALUE zparams_s_class( devclass  = ls_class-devclass
-                                                                                     namespace = ls_class-namespace )
+        CLEAR: ls_outtab_line.
+        ls_outtab_line-namespace = ls_class-namespace.
+        ls_outtab_line-devclass  = ls_class-devclass.
+        lv_nkey_package = alv_tree_add_node( ig_outtab_line = ls_outtab_line
                                              iv_node_text   = ls_class-devclass
                                              iv_is_folder   = abap_true
                                              iv_relat_key   = lv_nkey_ns ).
       ENDIF.
 
       alv_tree_add_node( ig_outtab_line = ls_class
-                          iv_node_text   = ls_class-param_obj->get_description( )
-                          iv_relat_key   = lv_nkey_package ).
+                         iv_node_text   = ls_class-param_obj->get_description( )
+                         iv_relat_key   = lv_nkey_package ).
 
       ls_class_last = ls_class.
 
@@ -916,10 +971,16 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD alv_tree_set_handler.
 
-    mo_alv_tree->get_registered_events( IMPORTING  events = DATA(lt_events)
+    DATA:
+      lt_events TYPE cntl_simple_events,
+      ls_event  LIKE LINE OF lt_events.
+
+    mo_alv_tree->get_registered_events( IMPORTING  events = lt_events
                                         EXCEPTIONS OTHERS = 0 ).
 
-    INSERT VALUE cntl_simple_event( eventid = cl_gui_column_tree=>eventid_item_double_click ) INTO TABLE lt_events.
+    CLEAR: ls_event.
+    ls_event-eventid = cl_gui_column_tree=>eventid_item_double_click.
+    INSERT ls_event INTO TABLE lt_events.
 
     mo_alv_tree->set_registered_events( EXPORTING  events = lt_events
                                         EXCEPTIONS OTHERS = 0 ).
@@ -964,7 +1025,10 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD check.
 
-    LOOP AT mt_attributes INTO DATA(ls_attribute).
+    DATA:
+      ls_attribute LIKE LINE OF mt_attributes.
+
+    LOOP AT mt_attributes INTO ls_attribute.
       check_data_type( ig_value = ls_attribute-value
                         iv_type  = ls_attribute-type ).
     ENDLOOP.
@@ -974,20 +1038,17 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD check_changes.
 
+    DATA:
+      ls_attribute LIKE LINE OF mt_attributes.
+
     IF mv_crud_mode <> zif_params_constants=>crud-update AND mv_crud_mode <> zif_params_constants=>crud-create.
       RETURN.
     ENDIF.
 
     mo_alv->check_changed_data( ).  " Refresh data from ALV
 
-    LOOP AT mt_attributes INTO DATA(ls_attribute).
-
-      IF ls_attribute-value = ls_attribute-old_value.
-        CONTINUE.
-      ENDIF.
-
+    LOOP AT mt_attributes INTO ls_attribute WHERE value <> old_value.
       INSERT ls_attribute INTO TABLE rt_changed.
-
     ENDLOOP.
 
   ENDMETHOD.
@@ -995,32 +1056,41 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD check_data_type.
 
-    DATA: lr_data TYPE REF TO data.
+    DATA:
+      lv_text1 TYPE sstring,
+      lv_text2 TYPE sstring,
+      lr_data  TYPE REF TO data.
+    FIELD-SYMBOLS:
+      <lg_data> TYPE any.
 
     CREATE DATA lr_data TYPE (iv_type).
     IF lr_data IS NOT BOUND.
+      lv_text1 = iv_type.
       RAISE EXCEPTION TYPE zcx_params
         EXPORTING
           textid = zcx_params=>error_generating_data_type
-          text1  = CONV #( iv_type ).
+          text1  = lv_text1.
     ENDIF.
 
-    ASSIGN lr_data->* TO FIELD-SYMBOL(<lg_data>).
+    ASSIGN lr_data->* TO <lg_data>.
     IF <lg_data> IS NOT ASSIGNED.
+      lv_text1 = iv_type.
       RAISE EXCEPTION TYPE zcx_params
         EXPORTING
           textid = zcx_params=>error_generating_data_type
-          text1  = CONV #( iv_type ).
+          text1  = lv_text1.
     ENDIF.
 
     TRY.
         <lg_data> = ig_value.
       CATCH cx_root.
+        lv_text1 = ig_value.
+        lv_text2 = iv_type.
         RAISE EXCEPTION TYPE zcx_params
           EXPORTING
             textid = zcx_params=>value_not_valid
-            text1  = CONV #( ig_value )
-            text2  = CONV #( iv_type ).
+            text1  = lv_text1
+            text2  = lv_text2.
     ENDTRY.
 
   ENDMETHOD.
@@ -1070,14 +1140,20 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD cmd_default.
 
-    mo_alv->get_selected_rows( IMPORTING et_index_rows = DATA(lt_sel_rows) ).
+    DATA:
+      lt_sel_rows TYPE lvc_t_row,
+      ls_sel_row  LIKE LINE OF lt_sel_rows.
+    FIELD-SYMBOLS:
+      <ls_attribute> LIKE LINE OF mt_attributes.
+
+    mo_alv->get_selected_rows( IMPORTING et_index_rows = lt_sel_rows ).
     IF lt_sel_rows IS INITIAL.
       RETURN.
     ENDIF.
 
-    LOOP AT lt_sel_rows INTO DATA(ls_sel_row).
+    LOOP AT lt_sel_rows INTO ls_sel_row.
 
-      READ TABLE mt_attributes ASSIGNING FIELD-SYMBOL(<ls_attribute>) INDEX ls_sel_row-index.
+      READ TABLE mt_attributes ASSIGNING <ls_attribute> INDEX ls_sel_row-index.
       IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
@@ -1090,8 +1166,11 @@ CLASS zcl_params_management IMPLEMENTATION.
 
 
   METHOD cmd_default_all.
+    
+    FIELD-SYMBOLS:
+      <ls_attribute> LIKE LINE OF mt_attributes.
 
-    LOOP AT mt_attributes ASSIGNING FIELD-SYMBOL(<ls_attribute>).
+    LOOP AT mt_attributes ASSIGNING <ls_attribute>.
       <ls_attribute>-value = fill_def_value( <ls_attribute>-attvalue ).
     ENDLOOP.
 
@@ -1100,9 +1179,13 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD cmd_transport.
 
-    DATA: lv_trkorr    TYPE trkorr,
-          lt_tr_object TYPE tr_objects,
-          lt_tr_key    TYPE tr_keys.
+    DATA:
+      lv_trkorr       TYPE trkorr,
+      lt_tr_object    TYPE tr_objects,
+      ls_object_entry LIKE LINE OF lt_tr_object,
+      lt_tr_key       TYPE tr_keys,
+      ls_tr_key       LIKE LINE OF lt_tr_key,
+      ls_attr         LIKE LINE OF mt_attributes_db.
 
     IF mt_attributes_db IS INITIAL.
       RETURN.
@@ -1134,19 +1217,25 @@ CLASS zcl_params_management IMPLEMENTATION.
     ENDIF.
 
 
-    INSERT VALUE e071( pgmid    = gc_tr_object-pgmid
-                       object   = gc_tr_object-objtype
-                       obj_name = gc_tr_object-objname
-                       activity = ms_activity-activity ) INTO TABLE lt_tr_object.
+    ls_object_entry-pgmid    = gc_tr_object-pgmid.
+    ls_object_entry-object   = gc_tr_object-objtype.
+    ls_object_entry-obj_name = gc_tr_object-objname.
+    ls_object_entry-activity = ms_activity-activity.
+    INSERT ls_object_entry INTO TABLE lt_tr_object.
 
-    LOOP AT mt_attributes_db INTO DATA(ls_attr).
-      INSERT VALUE e071k( pgmid      = gc_tr_object-pgmid
-                          object     = gc_tr_object-objtype
-                          objname    = gc_tr_object-objname
-                          mastertype = gc_tr_object-objtype
-                          mastername = gc_tr_object-objname
-                          tabkey     = |{ sy-mandt ALPHA = IN }{ ls_attr-clsname ALPHA = IN }{ ls_attr-cmpname }|
-                          activity   = ms_activity-activity ) INTO TABLE lt_tr_key.
+    LOOP AT mt_attributes_db INTO ls_attr.
+      ls_tr_key-pgmid      = gc_tr_object-pgmid.
+      ls_tr_key-object     = gc_tr_object-objtype.
+      ls_tr_key-objname    = gc_tr_object-objname.
+      ls_tr_key-mastertype = gc_tr_object-objtype.
+      ls_tr_key-mastername = gc_tr_object-objname.
+      ls_tr_key-activity   = ms_activity-activity.
+
+      CONCATENATE sy-mandt ls_attr-clsname ls_attr-cmpname
+        INTO ls_tr_key-tabkey RESPECTING BLANKS.
+
+      INSERT ls_tr_key INTO TABLE lt_tr_key.
+      
     ENDLOOP.
 
     " Transport
@@ -1168,14 +1257,20 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD cmd_undo.
 
-    mo_alv->get_selected_rows( IMPORTING et_index_rows = DATA(lt_sel_rows) ).
+    DATA:
+      lt_sel_rows TYPE lvc_t_row,
+      ls_sel_row  LIKE LINE OF lt_sel_rows.
+    FIELD-SYMBOLS:
+      <ls_attribute> LIKE LINE OF mt_attributes.
+
+    mo_alv->get_selected_rows( IMPORTING et_index_rows = lt_sel_rows ).
     IF lt_sel_rows IS INITIAL.
       RETURN.
     ENDIF.
 
-    LOOP AT lt_sel_rows INTO DATA(ls_sel_row).
+    LOOP AT lt_sel_rows INTO ls_sel_row.
 
-      READ TABLE mt_attributes ASSIGNING FIELD-SYMBOL(<ls_attribute>) INDEX ls_sel_row-index.
+      READ TABLE mt_attributes ASSIGNING <ls_attribute> INDEX ls_sel_row-index.
       IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
@@ -1189,8 +1284,13 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD complete_construction.
 
-    mo_msg_container = NEW #( ).
-    mo_event_handler = NEW #( me ).
+    DATA:
+      lx_class TYPE REF TO cx_class_not_existent.
+
+    CREATE OBJECT mo_msg_container.
+    CREATE OBJECT mo_event_handler
+      EXPORTING
+      params_management = me.
 
     " Build the transport object.
     CALL FUNCTION 'READ_IMG_ACTIVITY_FROM_MEMORY'
@@ -1204,8 +1304,10 @@ CLASS zcl_params_management IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        mo_main_class = NEW cl_oo_class( 'ZCL_PARAMS' ).
-      CATCH cx_class_not_existent INTO DATA(lx_class).
+        CREATE OBJECT mo_main_class
+          EXPORTING
+            clsname = 'ZCL_PARAMS'.
+      CATCH cx_class_not_existent INTO lx_class.
         RAISE EXCEPTION TYPE zcx_params
           EXPORTING
             previous = lx_class.
@@ -1219,7 +1321,10 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD fill_def_value.
 
-    DATA: lv_len TYPE i.
+    DATA:
+      lv_len TYPE i.
+    FIELD-SYMBOLS:
+      <lg_value> TYPE any.
 
     IF iv_value IS INITIAL.
       RETURN.
@@ -1232,7 +1337,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     ELSE.
 
-      ASSIGN (iv_value) TO FIELD-SYMBOL(<lg_value>).
+      ASSIGN (iv_value) TO <lg_value>.
       IF sy-subrc <> 0 OR <lg_value> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
@@ -1246,22 +1351,28 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD fill_table.
 
-    DATA: ls_output    LIKE LINE OF mt_attributes,
-          lt_params    TYPE seo_attributes,
-          ls_attkey    TYPE seocmpkey,
-          lv_reference TYPE string.
+    DATA:
+      lt_classes   TYPE zparams_t_class,
+      ls_class     LIKE LINE OF lt_classes,
+      ls_output    LIKE LINE OF mt_attributes,
+      lt_params    TYPE seo_attributes,
+      ls_param     LIKE LINE OF lt_params,
+      ls_attkey    TYPE seocmpkey,
+      lv_reference TYPE string.
+    FIELD-SYMBOLS:
+      <lg_ref> TYPE any.
 
     CLEAR: mt_attributes.
 
-    DATA(lt_classes) = get_classes( ).
+    lt_classes = get_classes( ).
 
     DELETE lt_classes WHERE clsname <> mv_filter_class.
 
-    LOOP AT lt_classes INTO DATA(ls_class).
+    LOOP AT lt_classes INTO ls_class.
       INSERT LINES OF get_class_params( ls_class-clsname ) INTO TABLE lt_params.
     ENDLOOP.
 
-    LOOP AT lt_params INTO DATA(ls_param).
+    LOOP AT lt_params INTO ls_param.
       CLEAR: ls_output, lv_reference.
 
       ls_attkey-clsname = ls_param-clsname.
@@ -1283,11 +1394,11 @@ CLASS zcl_params_management IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
-      ls_output = CORRESPONDING #( ls_param ).
+      MOVE-CORRESPONDING ls_param TO ls_output.
 
       lv_reference = |{ ls_param-clsname }=>{ ls_param-cmpname }|.
 
-      ASSIGN (lv_reference) TO FIELD-SYMBOL(<lg_ref>).
+      ASSIGN (lv_reference) TO <lg_ref>.
       IF sy-subrc = 0 AND <lg_ref> IS ASSIGNED.
         ls_output-value = <lg_ref>.
       ENDIF.
@@ -1309,12 +1420,16 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD refresh.
 
-    DATA(lt_attributes) = mt_attributes.
+    DATA:
+      lt_attributes LIKE mt_attributes,
+      ls_attribute  LIKE LINE OF lt_attributes.
+
+    lt_attributes = mt_attributes.
 
     SORT lt_attributes ASCENDING BY clsname.
     DELETE ADJACENT DUPLICATES FROM lt_attributes COMPARING clsname.
 
-    LOOP AT lt_attributes INTO DATA(ls_attribute).
+    LOOP AT lt_attributes INTO ls_attribute.
       zcl_params=>fill_params( ls_attribute-clsname ).
     ENDLOOP.
 
@@ -1326,12 +1441,14 @@ CLASS zcl_params_management IMPLEMENTATION.
   METHOD save.
 
     DATA:
-      lt_data_mod TYPE zparams_t_update,
-      ls_data_mod LIKE LINE OF lt_data_mod,
-      lt_data_old TYPE zparams_t_update,
-      ls_data_old LIKE LINE OF lt_data_old.
+      lt_changed   TYPE zparams_t_attribute,
+      ls_attribute LIKE LINE OF lt_changed,
+      lt_data_mod  TYPE zparams_t_update,
+      ls_data_mod  LIKE LINE OF lt_data_mod,
+      lt_data_old  TYPE zparams_t_update,
+      ls_data_old  LIKE LINE OF lt_data_old.
 
-    DATA(lt_changed) = check_changes( ).
+    lt_changed = check_changes( ).
 
     IF lt_changed IS INITIAL.
       RETURN.
@@ -1339,16 +1456,16 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     check( ).
 
-    LOOP AT lt_changed INTO DATA(ls_attribute).
+    LOOP AT lt_changed INTO ls_attribute.
       CLEAR: ls_data_mod, ls_data_old.
 
-      ls_data_mod = CORRESPONDING #( ls_attribute ).
+      MOVE-CORRESPONDING ls_attribute TO ls_data_mod.
 
       SELECT SINGLE *
-        INTO CORRESPONDING FIELDS OF @ls_data_old
+        INTO CORRESPONDING FIELDS OF ls_data_old
         FROM zparams
-        WHERE clsname = @ls_attribute-clsname
-          AND cmpname = @ls_attribute-cmpname.
+        WHERE clsname = ls_attribute-clsname
+          AND cmpname = ls_attribute-cmpname.
       IF sy-subrc = 0.
         INSERT ls_data_old INTO TABLE lt_data_old.
         ls_data_mod-crud_mode = zif_params_constants=>crud-update.

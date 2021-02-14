@@ -33,8 +33,18 @@ CLASS zcl_params IMPLEMENTATION.
 
   METHOD fill_params.
 
+    DATA:
+      lo_class     TYPE REF TO cl_oo_object,
+      lt_attr      TYPE seo_attributes,
+      ls_attr      LIKE LINE OF lt_attr,
+      lt_param     TYPE tt_params,
+      ls_param     LIKE LINE OF lt_param,
+      lv_reference TYPE string.
+    FIELD-SYMBOLS:
+      <lg_param> TYPE any.
+
     TRY.
-        DATA(lo_class) = cl_oo_class=>get_instance( iv_clsname ).
+        lo_class = cl_oo_class=>get_instance( iv_clsname ).
       CATCH cx_class_not_existent. " Class Does Not Exist
         CLEAR: lo_class.
     ENDTRY.
@@ -43,7 +53,7 @@ CLASS zcl_params IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(lt_attr) = lo_class->get_attributes( public_attributes_only = seox_true ).
+    lt_attr = lo_class->get_attributes( public_attributes_only = seox_true ).
 
     DELETE lt_attr WHERE typtype <> seoo_typtype_type.
     DELETE lt_attr WHERE attdecltyp <> seoo_attdecltyp_statics.
@@ -52,17 +62,17 @@ CLASS zcl_params IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(lt_param) = read_params( iv_clsname ).
+    lt_param = read_params( iv_clsname ).
 
-    LOOP AT lt_attr INTO DATA(ls_attr).
+    LOOP AT lt_attr INTO ls_attr.
 
-      READ TABLE lt_param INTO DATA(ls_param) WITH KEY clsname = ls_attr-clsname cmpname = ls_attr-cmpname.
+      READ TABLE lt_param INTO ls_param WITH KEY clsname = ls_attr-clsname cmpname = ls_attr-cmpname.
       IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
 
-      DATA(lv_reference) = |{ ls_attr-clsname }=>{ ls_attr-cmpname }|.
-      ASSIGN (lv_reference) TO FIELD-SYMBOL(<lg_param>).
+      lv_reference = |{ ls_attr-clsname }=>{ ls_attr-cmpname }|.
+      ASSIGN (lv_reference) TO <lg_param>.
       IF sy-subrc <> 0 OR <lg_param> IS NOT ASSIGNED.
         CONTINUE.
       ENDIF.
@@ -84,9 +94,9 @@ CLASS zcl_params IMPLEMENTATION.
   METHOD read_params.
 
     SELECT *
-      INTO TABLE @rt_params
+      INTO TABLE rt_params
       FROM zparams
-      WHERE clsname = @iv_class.
+      WHERE clsname = iv_class.
     IF sy-subrc <> 0.
       CLEAR: rt_params.
     ENDIF.

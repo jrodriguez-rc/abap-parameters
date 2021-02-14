@@ -6,7 +6,7 @@
         "skipGeneratedFunctionGroups": true
     },
     "syntax": {
-        "version": "v740sp08",
+        "version": "v702",
         "errorNamespace": "^Z",
         "globalConstants": [],
         "globalMacros": []
@@ -69,6 +69,7 @@
             "depth": 5
         },
         "obsolete_statement": {
+            "parameter": true,
             "refresh": true,
             "compute": true,
             "add": true,

@@ -122,18 +122,32 @@ CLASS zcx_params IMPLEMENTATION.
 
   METHOD raise_by_syst.
 
+    DATA:
+      ls_textid TYPE scx_t100key,
+      lv_text1 TYPE sstring,
+      lv_text2 TYPE sstring,
+      lv_text3 TYPE sstring,
+      lv_text4 TYPE sstring.
+
+    ls_textid-msgid = sy-msgid.
+    ls_textid-msgno = sy-msgno.
+    ls_textid-attr1 = 'TEXT1'.
+    ls_textid-attr2 = 'TEXT2'.
+    ls_textid-attr3 = 'TEXT3'.
+    ls_textid-attr4 = 'TEXT4'.
+
+    lv_text1 = sy-msgv1.
+    lv_text2 = sy-msgv2.
+    lv_text3 = sy-msgv3.
+    lv_text4 = sy-msgv4.
+
     RAISE EXCEPTION TYPE zcx_params
       EXPORTING
-        textid = VALUE scx_t100key( msgid = sy-msgid
-                                    msgno = sy-msgno
-                                    attr1 = 'TEXT1'
-                                    attr2 = 'TEXT2'
-                                    attr3 = 'TEXT3'
-                                    attr4 = 'TEXT4' )
-        text1  = CONV #( sy-msgv1 )
-        text2  = CONV #( sy-msgv2 )
-        text3  = CONV #( sy-msgv3 )
-        text4  = CONV #( sy-msgv4 ).
+        textid = ls_textid
+        text1  = lv_text1
+        text2  = lv_text2
+        text3  = lv_text3
+        text4  = lv_text4.
 
   ENDMETHOD.
 

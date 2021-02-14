@@ -1,4 +1,4 @@
-FUNCTION ZPARAMS_DB_UPDATE.
+FUNCTION zparams_db_update.
 *"----------------------------------------------------------------------
 *"*"Update Function Module:
 *"
@@ -20,15 +20,21 @@ FUNCTION ZPARAMS_DB_UPDATE.
     ty_writedocs TYPE STANDARD TABLE OF ty_writedoc WITH KEY clsname.
 
   DATA:
-    ls_parameter_db TYPE zparams,
-    lt_writedoc     TYPE ty_writedocs,
-    ls_writedoc     TYPE zparams_wd_zparams.
+    ls_data           LIKE LINE OF it_data,
+    ls_data_old       LIKE LINE OF it_data_old,
+    ls_parameter_db   TYPE zparams,
+    lt_writedoc       TYPE ty_writedocs,
+    ls_writedoc_class LIKE LINE OF lt_writedoc,
+    ls_writedoc       TYPE zparams_wd_zparams,
+    lv_object_id      TYPE cdobjectv.
+  FIELD-SYMBOLS:
+    <ls_writedoc> LIKE LINE OF lt_writedoc
 
-  LOOP AT it_data INTO DATA(ls_data).
-    CLEAR: ls_parameter_db.
+  LOOP AT it_data INTO ls_data.
+    CLEAR: ls_parameter_db, ls_writedoc.
 
-    ls_parameter_db = CORRESPONDING #( ls_data ).
-    ls_writedoc = CORRESPONDING #( ls_data ).
+    MOVE-CORRESPONDING ls_data TO ls_parameter_db.
+    MOVE-CORRESPONDING ls_data TO ls_writedoc.
 
     CASE ls_data-crud_mode.
       WHEN zif_params_constants=>crud-create.
@@ -64,7 +70,7 @@ FUNCTION ZPARAMS_DB_UPDATE.
 
     ENDCASE.
 
-    READ TABLE lt_writedoc ASSIGNING FIELD-SYMBOL(<ls_writedoc>)
+    READ TABLE lt_writedoc ASSIGNING <ls_writedoc>
       WITH KEY clsname = ls_data-clsname.
     IF sy-subrc <> 0.
       INSERT INITIAL LINE INTO TABLE lt_writedoc ASSIGNING <ls_writedoc>.
@@ -73,21 +79,22 @@ FUNCTION ZPARAMS_DB_UPDATE.
 
     INSERT ls_writedoc INTO TABLE <ls_writedoc>-data.
 
-    READ TABLE it_data_old INTO DATA(ls_data_old)
+    READ TABLE it_data_old INTO ls_data_old
       WITH KEY clsname = ls_data-clsname cmpname = ls_data-cmpname.
     IF sy-subrc <> 0.
       CONTINUE.
     ENDIF.
 
-    ls_writedoc = CORRESPONDING #( ls_data_old ).
+    MOVE-CORRESPONDING ls_data_old TO ls_writedoc.
     INSERT ls_writedoc INTO TABLE <ls_writedoc>-data_old.
 
   ENDLOOP.
 
-  LOOP AT lt_writedoc INTO DATA(ls_writedoc_class).
+  LOOP AT lt_writedoc INTO ls_writedoc_class.
+    lv_object_id = ls_writedoc_class-clsname.
     CALL FUNCTION 'ZPARAMS_WRITE_DOCUMENT'
       EXPORTING
-        objectid    = CONV cdobjectv( ls_writedoc_class-clsname )
+        objectid    = lv_object_id
         tcode       = iv_tcode
         utime       = iv_utime
         udate       = iv_udate
