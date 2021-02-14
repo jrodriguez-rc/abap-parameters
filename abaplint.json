@@ -120,8 +120,8 @@
             "test": "^LTCL_.*$"
         },
         "object_naming": {
-            "clas": "^ZC(L|X)(|\\_IM|\\_DEF|\\_FB)\\_PARAMS\\_",
-            "intf": "^ZIF\\_PARAMS\\_",
+            "clas": "^ZC(L|X)(|\\_IM|\\_DEF|\\_FB)\\_PARAMS($|\\_)",
+            "intf": "^ZIF\\_PARAMS($|\\_)",
             "prog": "^Z(|F)PARAMS",
             "fugr": "^ZPARAMS",
             "tabl": "^Z(|S|SK|SV)(|\\_)PARAMS",

@@ -2,7 +2,6 @@ CLASS zcl_params DEFINITION
   PUBLIC
   ABSTRACT
   CREATE PUBLIC
-
   GLOBAL FRIENDS zcl_params_management.
 
   PUBLIC SECTION.

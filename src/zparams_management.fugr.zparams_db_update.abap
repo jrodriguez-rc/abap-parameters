@@ -1,4 +1,4 @@
-FUNCTION ZPARAMS_DB_UPDATE.
+FUNCTION zparams_db_update.
 *"----------------------------------------------------------------------
 *"*"Update Function Module:
 *"

@@ -1,4 +1,4 @@
-FUNCTION ZPARAMS_MANAGE.
+FUNCTION zparams_manage.
 *"----------------------------------------------------------------------
 *"*"Local Interface:
 *"  IMPORTING

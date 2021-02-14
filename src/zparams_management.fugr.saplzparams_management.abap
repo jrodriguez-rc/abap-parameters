@@ -1,8 +1,8 @@
 *******************************************************************
 *   System-defined Include-files.                                 *
 *******************************************************************
-  INCLUDE lzparams_managementtop.            " Global Declarations
-  INCLUDE lzparams_managementuxx.            " Function Modules
+INCLUDE lzparams_managementtop.            " Global Declarations
+INCLUDE lzparams_managementuxx.            " Function Modules
 
 *******************************************************************
 *   User-defined Include-files (if necessary).                    *

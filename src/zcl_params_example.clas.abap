@@ -4,7 +4,6 @@ CLASS zcl_params_example DEFINITION
   INHERITING FROM zcl_params
   FINAL
   CREATE PUBLIC
-
   GLOBAL FRIENDS zcl_params.
 
   PUBLIC SECTION.
@@ -27,7 +26,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_PARAMS_EXAMPLE IMPLEMENTATION.
+CLASS zcl_params_example IMPLEMENTATION.
 
 
   METHOD class_constructor.
