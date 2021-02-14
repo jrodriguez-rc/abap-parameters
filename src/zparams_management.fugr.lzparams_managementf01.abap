@@ -50,9 +50,7 @@ ENDFORM.
 *----------------------------------------------------------------------*
 FORM pai_0100.
 
-  DATA(lv_exit) = go_prc->pai( gv_ucomm_0100 ).
-
-  IF lv_exit IS NOT INITIAL.
+  IF go_prc->pai( gv_ucomm_0100 ) = abap_true.
     go_prc->destroy( ).
     SET SCREEN 0.
     LEAVE SCREEN.
