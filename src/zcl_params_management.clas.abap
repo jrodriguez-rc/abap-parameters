@@ -31,15 +31,8 @@ CLASS zcl_params_management DEFINITION
         objname TYPE trobj_name VALUE 'ZPARAMS' ##NO_TEXT,
       END OF gc_tr_object.
 
-    "! <p class="shorttext synchronized" lang="en">Call from transaction</p>
-    "!
     CLASS-METHODS call_from_tx.
 
-    "! <p class="shorttext synchronized" lang="en">CONSTRUCTOR</p>
-    "!
-    "! @parameter iv_filter_package | <p class="shorttext synchronized" lang="en">Filtered package</p>
-    "! @parameter iv_filter_class | <p class="shorttext synchronized" lang="en">Filtered class</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS constructor
       IMPORTING
         !iv_filter_package TYPE csequence OPTIONAL
@@ -47,30 +40,18 @@ CLASS zcl_params_management DEFINITION
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Destructor</p>
-    "!
     METHODS destroy .
 
-    "! <p class="shorttext synchronized" lang="en">Process After Input</p>
-    "!
-    "! @parameter iv_ucomm | <p class="shorttext synchronized" lang="en">Function code</p>
-    "! @parameter rv_exit | <p class="shorttext synchronized" lang="en">abap_true: Exit execution</p>
     METHODS pai
       IMPORTING
         !iv_ucomm      TYPE syucomm
       RETURNING
-        VALUE(rv_exit) TYPE abap_bool.               "#EC METH_RET_BOOL
+        VALUE(rv_exit) TYPE abap_bool.
 
-    "! <p class="shorttext synchronized" lang="en">Before PBO</p>
-    "!
     METHODS before_pbo.
 
-    "! <p class="shorttext synchronized" lang="en">Process Before Output</p>
-    "!
     METHODS pbo.
 
-    "! <p class="shorttext synchronized" lang="en">After PBO</p>
-    "!
     METHODS after_pbo.
 
   PROTECTED SECTION.
@@ -101,15 +82,8 @@ CLASS zcl_params_management DEFINITION
         subobject  TYPE ob_subobj,
       END OF ms_activity.
 
-    "! <p class="shorttext synchronized" lang="en">After event process</p>
-    "!
     METHODS after_event.
 
-    "! <p class="shorttext synchronized" lang="en">Get param. class</p>
-    "!
-    "! @parameter iv_class | <p class="shorttext synchronized" lang="en">Class</p>
-    "! @parameter iv_refresh | <p class="shorttext synchronized" lang="en">Refresh buffer</p>
-    "! @parameter rs_class | <p class="shorttext synchronized" lang="en">Class</p>
     METHODS get_class
       IMPORTING
         !iv_class       TYPE seoclsname
@@ -117,82 +91,48 @@ CLASS zcl_params_management DEFINITION
       RETURNING
         VALUE(rs_class) TYPE zparams_s_class.
 
-    "! <p class="shorttext synchronized" lang="en">Get param. classes</p>
-    "!
-    "! @parameter iv_refresh | <p class="shorttext synchronized" lang="en">Refresh buffer</p>
-    "! @parameter rt_classes | <p class="shorttext synchronized" lang="en">Classes</p>
     METHODS get_classes
       IMPORTING
         !iv_refresh       TYPE abap_bool DEFAULT abap_false
       RETURNING
         VALUE(rt_classes) TYPE zparams_t_class.
 
-    "! <p class="shorttext synchronized" lang="en">Get param. class description</p>
-    "!
-    "! @parameter iv_class | <p class="shorttext synchronized" lang="en">Class</p>
-    "! @parameter rv_description | <p class="shorttext synchronized" lang="en">Description</p>
     METHODS get_class_description
       IMPORTING
         !iv_class             TYPE seoclsname
       RETURNING
         VALUE(rv_description) TYPE string.
 
-    "! <p class="shorttext synchronized" lang="en">Get Class Customizable Attributes</p>
-    "!
-    "! @parameter iv_class | <p class="shorttext synchronized" lang="en">Class</p>
-    "! @parameter rt_attr | <p class="shorttext synchronized" lang="en">Attributes</p>
     METHODS get_class_params
       IMPORTING
         !iv_class      TYPE seoclsname
       RETURNING
         VALUE(rt_attr) TYPE seo_attributes .
 
-    "! <p class="shorttext synchronized" lang="en">Returns params. interface instance</p>
-    "!
-    "! @parameter ro_main_class | <p class="shorttext synchronized" lang="en">Interface instance</p>
     METHODS get_main_class
       RETURNING
         VALUE(ro_main_class) TYPE REF TO cl_oo_class .
 
-    "! <p class="shorttext synchronized" lang="en">Is edit allowed</p>
-    "!
-    "! @parameter rv_allowed | <p class="shorttext synchronized" lang="en">Allowed</p>
     METHODS is_edit_allowed
       RETURNING
         VALUE(rv_allowed) TYPE abap_bool.
 
-    "! <p class="shorttext synchronized" lang="en">Is function disabled</p>
-    "!
-    "! @parameter iv_fcode | <p class="shorttext synchronized" lang="en">Function Code</p>
-    "! @parameter rv_disabled | <p class="shorttext synchronized" lang="en">abap_true: Disabled</p>
     METHODS is_func_disabled
       IMPORTING
         !iv_fcode          TYPE csequence
       RETURNING
         VALUE(rv_disabled) TYPE abap_bool.
 
-    "! <p class="shorttext synchronized" lang="en">Lock class</p>
-    "!
-    "! @parameter iv_class | <p class="shorttext synchronized" lang="en">Class</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS lock_class
       IMPORTING
         !iv_class TYPE seoclsname
       RAISING
         zcx_params.
 
-    "! <p class="shorttext synchronized" lang="en">Open class to display attributes</p>
-    "!
-    "! @parameter iv_class | <p class="shorttext synchronized" lang="en">Class</p>
     METHODS open_class
       IMPORTING
         !iv_class TYPE seoclsname.
 
-    "! <p class="shorttext synchronized" lang="en">Set filter</p>
-    "!
-    "! @parameter iv_filter_package | <p class="shorttext synchronized" lang="en">Package</p>
-    "! @parameter iv_filter_class | <p class="shorttext synchronized" lang="en">Class</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS set_filter
       IMPORTING
         !iv_filter_package TYPE csequence OPTIONAL
@@ -200,59 +140,32 @@ CLASS zcl_params_management DEFINITION
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Unlock class</p>
-    "!
-    "! @parameter iv_class | <p class="shorttext synchronized" lang="en">Class</p>
     METHODS unlock_class
       IMPORTING
         !iv_class TYPE seoclsname.
 
-    "! <p class="shorttext synchronized" lang="en">Fill ALV Field catalog</p>
-    "!
-    "! @parameter rt_fieldcatalog | <p class="shorttext synchronized" lang="en">Field Catalog</p>
     METHODS alv_get_fieldcatalog
       RETURNING
         VALUE(rt_fieldcatalog) TYPE lvc_t_fcat .
 
-    "! <p class="shorttext synchronized" lang="en">Fill ALV Layout</p>
-    "!
-    "! @parameter rs_layout | <p class="shorttext synchronized" lang="en">ALV Layout</p>
     METHODS alv_get_layout
       RETURNING
         VALUE(rs_layout) TYPE lvc_s_layo .
 
-    "! <p class="shorttext synchronized" lang="en">Fill ALV excluding functions</p>
-    "!
-    "! @parameter rt_toolbar_excluding | <p class="shorttext synchronized" lang="en">Excluding functions</p>
     METHODS alv_get_toolbar_exclude
       RETURNING
         VALUE(rt_toolbar_excluding) TYPE ui_functions .
 
-    "! <p class="shorttext synchronized" lang="en">Fill ALV Variant</p>
-    "!
-    "! @parameter rs_variant | <p class="shorttext synchronized" lang="en">ALV Variant</p>
     METHODS alv_get_variant
       RETURNING
         VALUE(rs_variant) TYPE disvariant .
 
-    "! <p class="shorttext synchronized" lang="en">Build ALV Grid</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS alv_prepare
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Set ALV handler events</p>
-    "!
     METHODS alv_set_handler .
 
-    "! <p class="shorttext synchronized" lang="en">Add ALV Tree node</p>
-    "!
-    "! @parameter ig_outtab_line | <p class="shorttext synchronized" lang="en">Tab line</p>
-    "! @parameter iv_node_text | <p class="shorttext synchronized" lang="en">Node text</p>
-    "! @parameter iv_is_folder | <p class="shorttext synchronized" lang="en">abap_true: is folder</p>
-    "! @parameter iv_relat_key | <p class="shorttext synchronized" lang="en">Related node key</p>
-    "! @parameter rv_nkey | <p class="shorttext synchronized" lang="en">Node Key</p>
     METHODS alv_tree_add_node
       IMPORTING
         !ig_outtab_line TYPE any OPTIONAL
@@ -262,37 +175,20 @@ CLASS zcl_params_management DEFINITION
       RETURNING
         VALUE(rv_nkey)  TYPE lvc_nkey .
 
-    "! <p class="shorttext synchronized" lang="en">Build ALV Tree</p>
-    "!
     METHODS alv_tree_build .
 
-    "! <p class="shorttext synchronized" lang="en">Buidl ALV Tree hierarchy</p>
-    "!
     METHODS alv_tree_build_hierarchy .
 
-    "! <p class="shorttext synchronized" lang="en">Get ALV Tree header</p>
-    "!
-    "! @parameter rs_header | <p class="shorttext synchronized" lang="en">ALV Tree Header</p>
     METHODS alv_tree_get_header
       RETURNING
         VALUE(rs_header) TYPE treev_hhdr .
 
-    "! <p class="shorttext synchronized" lang="en">Fill ALV Tree variant</p>
-    "!
-    "! @parameter rs_variant | <p class="shorttext synchronized" lang="en">ALV Tree variant</p>
     METHODS alv_tree_get_variant
       RETURNING
         VALUE(rs_variant) TYPE disvariant .
 
-    "! <p class="shorttext synchronized" lang="en">Set ALV Tree handler events</p>
-    "!
     METHODS alv_tree_set_handler .
 
-    "! <p class="shorttext synchronized" lang="en">Call function</p>
-    "!
-    "! @parameter iv_ucomm | <p class="shorttext synchronized" lang="en">Function code</p>
-    "! @parameter rv_exit | <p class="shorttext synchronized" lang="en">abap_true: Exit execution</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS call_function
       IMPORTING
         !iv_ucomm      TYPE syucomm
@@ -300,26 +196,15 @@ CLASS zcl_params_management DEFINITION
         VALUE(rv_exit) TYPE abap_bool
       RAISING
         zcx_params.
-                                                     "#EC METH_RET_BOOL
-    "! <p class="shorttext synchronized" lang="en">Check</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
+
     METHODS check
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Check changes</p>
-    "!
-    "! @parameter rt_changed | <p class="shorttext synchronized" lang="en">Data changed</p>
     METHODS check_changes
       RETURNING
         VALUE(rt_changed) TYPE zparams_t_attribute .
 
-    "! <p class="shorttext synchronized" lang="en">Check value for data type</p>
-    "!
-    "! @parameter ig_value | <p class="shorttext synchronized" lang="en">Value</p>
-    "! @parameter iv_type | <p class="shorttext synchronized" lang="en">Data Type</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS check_data_type
       IMPORTING
         !ig_value TYPE any
@@ -327,49 +212,28 @@ CLASS zcl_params_management DEFINITION
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Check changes to save</p>
-    "!
-    "! @parameter rv_save_done | <p class="shorttext synchronized" lang="en">abap_true: Exit execution</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS try_save_changes
       RETURNING
         VALUE(rv_save_done) TYPE abap_bool
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Function: Restore default value</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS cmd_default
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Function: Restore default values for all attributes</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS cmd_default_all
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Function: Transport</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS cmd_transport
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Function: Dischard changes</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS cmd_undo
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Complete construction</p>
-    "!
-    "! @parameter iv_filter_package | <p class="shorttext synchronized" lang="en">Filtered Package</p>
-    "! @parameter iv_filter_class | <p class="shorttext synchronized" lang="en">Filtered Class</p>
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS complete_construction
       IMPORTING
         !iv_filter_package TYPE csequence OPTIONAL
@@ -377,33 +241,20 @@ CLASS zcl_params_management DEFINITION
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Fill default value</p>
-    "!
-    "! @parameter iv_value | <p class="shorttext synchronized" lang="en">Value</p>
-    "! @parameter rv_value | <p class="shorttext synchronized" lang="en">Value</p>
     METHODS fill_def_value
       IMPORTING
         !iv_value       TYPE csequence
       RETURNING
         VALUE(rv_value) TYPE string .
 
-    "! <p class="shorttext synchronized" lang="en">Fill attributes Table</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS fill_table
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Refresh</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS refresh
       RAISING
         zcx_params .
 
-    "! <p class="shorttext synchronized" lang="en">Save</p>
-    "!
-    "! @raising zcx_params | <p class="shorttext synchronized" lang="en">Resulto BS: Static Exception</p>
     METHODS save
       RAISING
         zcx_params .

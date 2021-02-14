@@ -1,4 +1,3 @@
-"! <p class="shorttext synchronized" lang="en">Parameters exceptions</p>
 CLASS zcx_params DEFINITION
   PUBLIC
   INHERITING FROM cx_static_check

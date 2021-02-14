@@ -1,4 +1,3 @@
-"! <p class="shorttext synchronized" lang="en">Example parameter class</p>
 CLASS zcl_params_example DEFINITION
   PUBLIC
   INHERITING FROM zcl_params
