@@ -11,6 +11,10 @@ CLASS zcl_params_example DEFINITION
 
     CLASS-METHODS class_constructor.
 
+    METHODS constructor
+      IMPORTING
+        iv_refresh TYPE abap_bool DEFAULT abap_true.
+
     METHODS zif_params~get_description
         REDEFINITION.
 
@@ -28,9 +32,19 @@ ENDCLASS.
 CLASS zcl_params_example IMPLEMENTATION.
 
 
+  METHOD constructor.
+
+    super->constructor( iv_clsname = `ZCL_PARAMS_EXAMPLE` iv_refresh = iv_refresh ).
+
+  ENDMETHOD.
+
+
   METHOD class_constructor.
 
-    zcl_params=>fill_params( 'ZCL_PARAMS_EXAMPLE' ).
+    DATA:
+      lo_example TYPE REF TO zcl_params_example.
+
+    CREATE OBJECT lo_example.
 
   ENDMETHOD.
 
@@ -47,4 +61,6 @@ CLASS zcl_params_example IMPLEMENTATION.
     rv_subobject = 'ZTSTPARAMS'.
 
   ENDMETHOD.
+
+
 ENDCLASS.

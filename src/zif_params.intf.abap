@@ -2,6 +2,12 @@
 INTERFACE zif_params
   PUBLIC.
 
+  "! <p class="shorttext synchronized" lang="en">Allow changed in a locked client</p>
+  "!
+  METHODS allow_changes_locked_client
+    RETURNING
+      VALUE(result) TYPE abap_bool.
+
   "! <p class="shorttext synchronized" lang="en">Get IMG Subobject</p>
   "! Filter class by an assigned object in IMG Activity Maintenance Object
   "!

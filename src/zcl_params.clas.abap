@@ -9,6 +9,11 @@ CLASS zcl_params DEFINITION
     INTERFACES zif_params
       ABSTRACT METHODS get_img_subobject get_description.
 
+    METHODS constructor
+      IMPORTING
+        !iv_clsname TYPE seoclsname
+        !iv_refresh TYPE abap_bool DEFAULT abap_true.
+
   PROTECTED SECTION.
     CLASS-METHODS fill_params
       IMPORTING
@@ -31,6 +36,17 @@ ENDCLASS.
 CLASS zcl_params IMPLEMENTATION.
 
 
+  METHOD constructor.
+
+    IF iv_refresh = abap_false.
+      RETURN.
+    ENDIF.
+
+    fill_params( iv_clsname ).
+
+  ENDMETHOD.
+
+
   METHOD fill_params.
 
     DATA:
@@ -40,6 +56,7 @@ CLASS zcl_params IMPLEMENTATION.
       lt_param     TYPE tt_params,
       ls_param     LIKE LINE OF lt_param,
       lv_reference TYPE string.
+
     FIELD-SYMBOLS:
       <lg_param> TYPE any.
 
@@ -102,4 +119,11 @@ CLASS zcl_params IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+
+  METHOD zif_params~allow_changes_locked_client.
+    result = abap_false.
+  ENDMETHOD.
+
+
 ENDCLASS.

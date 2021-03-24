@@ -550,6 +550,10 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD lock_class.
 
+    DATA:
+      lv_transport_state TYPE cccoractiv,
+      li_params          TYPE REF TO zif_params.
+
     mv_crud_mode = zif_params_constants=>crud-read.
 
     IF mo_alv IS BOUND.
@@ -558,6 +562,26 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     IF iv_class IS INITIAL.
       RETURN.
+    ENDIF.
+
+    CALL FUNCTION 'VIEW_GET_CLIENT_STATE'
+      IMPORTING
+        transp_state = lv_transport_state.
+
+    IF lv_transport_state = `2`.
+
+      TRY.
+          CREATE OBJECT li_params TYPE (iv_class)
+            EXPORTING
+              iv_refresh = abap_false.
+        CATCH cx_root.
+          RETURN.
+      ENDTRY.
+
+      IF li_params->allow_changes_locked_client( ) = abap_false.
+        RETURN.
+      ENDIF.
+
     ENDIF.
 
     CALL FUNCTION 'ENQUEUE_EZPARAMS'
@@ -889,7 +913,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
   METHOD alv_tree_build.
 
-    IF mv_filter_class IS NOT INITIAL OR mo_alv_tree IS BOUND OR lines( get_classes( ) ) <= 1.
+    IF mv_filter_class IS NOT INITIAL OR mo_alv_tree IS BOUND OR lines( get_classes( ) ) = 1.
       RETURN.
     ENDIF.
 
@@ -921,6 +945,7 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     DATA:
       lt_classes      TYPE zparams_t_class,
+      lt_classes_ns   TYPE zparams_t_class,
       ls_class        LIKE LINE OF lt_classes,
       ls_class_last   TYPE zparams_s_class,
       ls_outtab_line  TYPE zparams_s_class,
@@ -931,9 +956,12 @@ CLASS zcl_params_management IMPLEMENTATION.
 
     SORT lt_classes ASCENDING BY namespace clsname.
 
+    lt_classes_ns = lt_classes.
+    DELETE ADJACENT DUPLICATES FROM lt_classes_ns COMPARING namespace.
+
     LOOP AT lt_classes INTO ls_class.
 
-      IF ls_class_last-namespace <> ls_class-namespace.
+      IF ls_class_last-namespace <> ls_class-namespace AND lines( lt_classes_ns ) > 1.
         CLEAR: ls_outtab_line.
         ls_outtab_line-namespace = ls_class-namespace.
         lv_nkey_ns = alv_tree_add_node( ig_outtab_line = ls_outtab_line
