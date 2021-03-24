@@ -36,6 +36,8 @@ FUNCTION zparams_db_update.
     MOVE-CORRESPONDING ls_data TO ls_parameter_db.
     MOVE-CORRESPONDING ls_data TO ls_writedoc.
 
+    ls_writedoc-client = sy-mandt.
+
     CASE ls_data-crud_mode.
       WHEN zif_params_constants=>crud-create.
         ls_writedoc-kz = 'I'.
